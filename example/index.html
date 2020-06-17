@@ -1,0 +1,88 @@
+<!DOCTYPE html>
+<html>
+	<head>
+        <meta charset="utf-8">
+        <meta name="viewport" content="width=device-width, initial-scale=1.0">
+		<title>three-colorblind.js</title>
+		<style>
+			body { margin: 0; height: 100%; width: 100%; }
+			canvas { display: block; }
+            #colourname { position: absolute; color: white; right: 50px; }
+		</style>
+	</head>
+	<body>
+        <h1 id="colourname"></h1>
+		<script type="text/javascript" src="./js/three.js"></script>
+		<script type="text/javascript" src="../src/three-colorblind.js"></script>
+		<script>
+            // Hold reference to body for resizing
+            const container = document.getElementsByTagName('body')[0];
+
+            // Scene setup
+			const scene = new THREE.Scene();
+            const camera = new THREE.PerspectiveCamera(75, container.offsetWidth / container.offsetHeight, 0.1, 1000);
+            const initialCameraFOV = camera.fov;
+            const desiredAspectRatio = 1;
+            // Set camera so we can see the plane
+            camera.position.z = 5;
+
+            // Renderer setup
+            const renderer = new THREE.WebGLRenderer();
+            renderer.setSize(window.innerWidth, window.innerHeight);
+            container.appendChild(renderer.domElement);
+
+            // Create primitive
+            const geometry = new THREE.PlaneGeometry(6, 6, 1);
+            let plane;
+
+            // Assign shader to material
+            const loader = new THREE.TextureLoader();
+            loader.load('./assets/RGB_Colorcube_Corner_White.png', function (texture) {
+                const material = GetBasicColorBlindMaterial();
+                material.uniforms.map.value = texture;
+                material.transparent = true;
+
+                document.getElementById("colourname").textContent = ColorModeNormal.name;
+
+                // Create primitive
+                plane = new THREE.Mesh(geometry, material);
+                scene.add(plane);
+
+                init();
+            });
+
+
+            // Render the scene
+			const animate = function() {
+				requestAnimationFrame(animate);
+				renderer.render(scene, camera);
+            };
+
+            // Resize the canvas so it works on most(?) screens
+            const onWindowResize =function() {
+                const newAspect = window.innerWidth / window.innerHeight;
+
+                // Clamp the FoV between the initial fov and the new smaller fov but make sure it doesn't go past 180....
+                camera.fov = Math.max(initialCameraFOV, Math.max(0, Math.min(initialCameraFOV * (desiredAspectRatio / newAspect), 180)));
+
+                camera.aspect = newAspect;
+                camera.updateProjectionMatrix();
+
+                renderer.setSize(window.innerWidth, window.innerHeight);
+            }
+            
+            // Kick off rendering
+            const init = function() {
+                window.addEventListener('resize', onWindowResize);
+                onWindowResize();
+                animate();
+                
+                window.addEventListener('keydown', function(event) {
+                    const colourMode = ToggleColorBlindModes(event.key);
+                    document.getElementById("colourname").textContent = colourMode.name;
+                })
+            }
+
+		</script>
+	</body>
+</html>
