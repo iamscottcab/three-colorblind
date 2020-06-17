@@ -1,3 +1,9 @@
+/**
+ * Written by Scott Cabot (@iamscottcab) 17 June 2020
+ * Distributed under GNU General Public License v3.0
+ * Original inspiration taken from https://www.alanzucconi.com/2015/12/16/color-blindness/
+ */
+
 const VertexShader =
 `
 varying vec2 vUv;
